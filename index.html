@@ -31,6 +31,9 @@ input[type=text]:focus{border-color:var(--g)}
 .tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:22px;animation:fu .5s .5s ease both}
 .tag{padding:3px 11px;border:1px solid rgba(255,255,255,0.1);border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;color:#304050}
 .acard{margin-top:40px;padding:18px 28px;background:rgba(255,255,255,0.03);border:1px solid rgba(245,158,11,0.14);border-radius:10px;max-width:440px;width:100%;text-align:left;animation:fu .5s .6s ease both}
+.alinks{display:flex;gap:14px;margin-top:12px}
+.alink{display:flex;align-items:center;gap:5px;color:#F59E0B;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-decoration:none;opacity:.8;transition:opacity .2s}
+.alink:hover{opacity:1}
 .al{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--g);text-transform:uppercase;margin-bottom:5px}
 .an{font-family:'Playfair Display',serif;font-size:19px;color:#f0ebe0}
 .am{font-family:'DM Mono',monospace;font-size:10px;color:#304050;margin-top:3px}
@@ -111,7 +114,6 @@ input[type=text]:focus{border-color:var(--g)}
 <div id="land">
   <div class="gbg"></div>
   <div class="wm">DCF</div>
-  <div class="badge">SMU Masters in Management · Finance Project</div>
   <h1>DCF <em>Valuation</em><br/>Engine</h1>
   <p class="sub">Automated Discounted Cash Flow analysis with Monte Carlo simulation — built to replicate the modelling workflows used by investment banking analysts.</p>
   <div class="stats">
@@ -127,8 +129,14 @@ input[type=text]:focus{border-color:var(--g)}
   </div>
   <div class="acard">
     <div class="al">Built by</div>
-    <div class="an">Aashray Agarwal</div>
-    <div class="am">Masters in Management · Singapore Management University</div>
+    <div class="an" id="author-name">Aashray Agarwal</div>
+    <div class="am">Masters in Management &middot; Singapore Management University</div>
+    <div class="alinks">
+      <a href="https://linkedin.com/in/YOUR-LINKEDIN" target="_blank" class="alink">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        LinkedIn
+      </a>
+    </div>
   </div>
 </div>
 
@@ -144,11 +152,11 @@ input[type=text]:focus{border-color:var(--g)}
   <div class="body">
     <div class="side">
       <div class="il">Company</div>
-      <input type="text" id="co" value="DemoTech Inc." style="margin-bottom:5px" oninput="go()"/>
-      <input type="text" id="ti" value="DEMO" style="margin-bottom:12px;color:var(--g);letter-spacing:2px" oninput="go()"/>
+      <input type="text" id="co" value="Sea Limited" style="margin-bottom:5px" oninput="go()"/>
+      <input type="text" id="ti" value="SE" style="margin-bottom:12px;color:var(--g);letter-spacing:2px" oninput="go()"/>
       <div class="il">Base Revenue ($M)</div>
-      <div class="ir"><div class="irt"><span class="in">Revenue</span><span class="iv" id="v-rev">500M</span></div>
-        <input type="range" min="10" max="10000" step="10" value="500" oninput="upd(this,'rev','M','revenue')"/></div>
+      <div class="ir"><div class="irt"><span class="in">Revenue</span><span class="iv" id="v-rev">13100M</span></div>
+        <input type="range" min="10" max="10000" step="10" value="13100" oninput="upd(this,'rev','M','revenue')"/></div>
       <div class="il">Revenue Growth (%)</div>
       <div id="gsl"></div>
       <div class="il">Profitability</div>
@@ -172,10 +180,12 @@ input[type=text]:focus{border-color:var(--g)}
 
 <script>
 // ── STATE ──────────────────────────────────────────────────────────────────
+// Pre-loaded: Sea Limited (SE) — FY2023 base, SGX primary listing
+// Revenue ~$13.1B, recently profitable, digital entertainment + e-commerce + fintech
 var S = {
-  revenue: 500, gr: [18,15,13,11,9],
-  ebit: 22, tax: 17, da: 4, capex: 6, nwc: 8,
-  wacc: 10, tg: 2.5, shares: 100, debt: 50
+  revenue: 13100, gr: [7, 9, 11, 10, 9],
+  ebit: 6, tax: 17, da: 3, capex: 4, nwc: 5,
+  wacc: 11, tg: 3, shares: 570, debt: -3200
 };
 var curTab = 'dcf', mcArr = [], mcRan = false;
 function G(id){ return document.getElementById(id); }
@@ -204,19 +214,19 @@ function buildSide() {
     return mkS('g'+i,'Year '+(i+1),-10,60,0.5,g,'%','updG(this,'+i+')');
   }).join('');
   G('psl').innerHTML = [
-    mkS('ebit','EBIT Margin',1,60,0.5,22,'%',"upd(this,'ebit','%','ebit')"),
+    mkS('ebit','EBIT Margin',1,60,0.5,6,'%',"upd(this,'ebit','%','ebit')"),
     mkS('tax','Tax Rate',0,40,0.5,17,'%',"upd(this,'tax','%','tax')"),
-    mkS('da','D&A % Rev',0,20,0.25,4,'%',"upd(this,'da','%','da')"),
-    mkS('capex','CapEx % Rev',0,30,0.25,6,'%',"upd(this,'capex','%','capex')"),
-    mkS('nwc','ΔNWC % Rev',0,25,0.25,8,'%',"upd(this,'nwc','%','nwc')")
+    mkS('da','D&A % Rev',0,20,0.25,3,'%',"upd(this,'da','%','da')"),
+    mkS('capex','CapEx % Rev',0,30,0.25,4,'%',"upd(this,'capex','%','capex')"),
+    mkS('nwc','ΔNWC % Rev',0,25,0.25,5,'%',"upd(this,'nwc','%','nwc')")
   ].join('');
   G('dsl').innerHTML = [
-    mkS('wacc','WACC',4,25,0.25,10,'%',"upd(this,'wacc','%','wacc')"),
-    mkS('tg','Terminal Growth',0,5,0.1,2.5,'%',"upd(this,'tg','%','tg')")
+    mkS('wacc','WACC',4,25,0.25,11,'%',"upd(this,'wacc','%','wacc')"),
+    mkS('tg','Terminal Growth',0,5,0.1,3,'%',"upd(this,'tg','%','tg')")
   ].join('');
   G('ksl').innerHTML = [
-    mkS('shares','Shares Out (M)',1,10000,1,100,'M',"upd(this,'shares','M','shares')"),
-    mkS('debt','Net Debt ($M)',-5000,10000,10,50,'M',"upd(this,'debt','M','debt')")
+    mkS('shares','Shares Out (M)',1,10000,1,570,'M',"upd(this,'shares','M','shares')"),
+    mkS('debt','Net Debt ($M)',-5000,10000,10,-3200,'M',"upd(this,'debt','M','debt')")
   ].join('');
 }
 
