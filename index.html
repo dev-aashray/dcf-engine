@@ -287,26 +287,46 @@ function hist(a,n){
 
 // SVG CHARTS
 function barSVG(data,W,H){
-  var pl=50,pr=10,pt=10,pb=28;
+  var pl=54,pr=12,pt=14,pb=30;
   var vals=data.map(function(d){return d.v});
-  var mx=Math.max.apply(null,vals)*1.15||1;
-  var bw=(W-pl-pr)/data.length-4;
+  var mx=Math.max.apply(null,vals)*1.18||1;
+  var n=data.length;
+  var slotW=(W-pl-pr)/n;
+  var bw=Math.max(slotW*0.62,6);
+  var gap=(slotW-bw)/2;
   function sy(v){return H-pb-(v/mx)*(H-pt-pb)}
-  function sx(i){return pl+i*(W-pl-pr)/data.length+2}
+  function sx(i){return pl+i*slotW+gap}
+  function cx(i){return sx(i)+bw/2}
+
   var bars=data.map(function(d,i){
-    var x=sx(i),y=sy(d.v),bh=H-pb-y;
-    var fill=d.t==='tv'?'rgba(245,158,11,0.75)':'rgba(96,165,250,0.68)';
-    return '<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" rx="3" fill="'+fill+'"/>';
+    var rawY=sy(d.v);
+    var y=Math.max(rawY,pt); // clamp to top of chart area
+    var bh=Math.max(H-pb-y,1);
+    var fill=d.t==='tv'?'rgba(245,158,11,0.78)':'rgba(96,165,250,0.70)';
+    // value label on top of bar
+    var lbl='';
+    if(bh>14){
+      lbl='<text x="'+cx(i)+'" y="'+(y-3)+'" text-anchor="middle" fill="'+(d.t==='tv'?'#F59E0B':'#93c5fd')+'" font-size="9" font-family="monospace">$'+d.v.toFixed(0)+'M</text>';
+    }
+    return '<rect x="'+sx(i)+'" y="'+y+'" width="'+bw+'" height="'+bh+'" rx="3" fill="'+fill+'"/>'+lbl;
   }).join('');
+
   var xl=data.map(function(d,i){
-    return '<text x="'+(sx(i)+bw/2)+'" y="'+(H-8)+'" text-anchor="middle" fill="#5a6a7a" font-size="10" font-family="monospace">'+d.n+'</text>';
+    return '<text x="'+cx(i)+'" y="'+(H-10)+'" text-anchor="middle" fill="#5a6a7a" font-size="10" font-family="monospace">'+d.n+'</text>';
   }).join('');
-  var yt=[0,.33,.66,1].map(function(p){
+
+  var yt=[0,.25,.5,.75,1].map(function(p){
     var v=mx*p,y=sy(v);
-    return '<text x="'+(pl-4)+'" y="'+(y+3)+'" text-anchor="end" fill="#4a5a6a" font-size="9" font-family="monospace">$'+v.toFixed(0)+'M</text>'+
-      '<line x1="'+pl+'" y1="'+y+'" x2="'+(W-pr)+'" y2="'+y+'" stroke="rgba(255,255,255,0.05)"/>';
+    if(y<pt||y>H-pb)return'';
+    return '<text x="'+(pl-5)+'" y="'+(y+3)+'" text-anchor="end" fill="#3a4a5a" font-size="9" font-family="monospace">$'+v.toFixed(0)+'M</text>'+
+      '<line x1="'+pl+'" y1="'+y+'" x2="'+(W-pr)+'" y2="'+y+'" stroke="rgba(255,255,255,0.06)"/>';
   }).join('');
-  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%">'+yt+bars+xl+'</svg>';
+
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;display:block">'+
+    '<clipPath id="chartClip"><rect x="'+pl+'" y="'+pt+'" width="'+(W-pl-pr)+'" height="'+(H-pt-pb)+'"/></clipPath>'+
+    yt+
+    '<g clip-path="url(#chartClip)">'+bars+'</g>'+
+    xl+'</svg>';
 }
 
 function histSVG(h,bp,p5,p25,p75,p95,W,H){
@@ -378,7 +398,7 @@ function renderDCF(d){
     kbox('Intrinsic Price',d.pps?fP(d.pps):'N/A',S.shares+'M shares','#60a5fa')+
     kbox('TV % of EV',fPct(d.tvPct),'Terminal g: '+S.tg+'%',d.tvPct>75?'#ef4444':'#F59E0B')+
     '</div><div class="slbl" style="margin-bottom:6px">Value Build-Up ($M)</div>'+
-    '<div style="height:190px;margin-bottom:22px">'+barSVG(wf,560,190)+'</div>'+
+    '<div style="margin-bottom:22px">'+barSVG(wf,580,224)+'</div>'+
     '<div class="slbl">Projected Free Cash Flows</div><div style="overflow-x:auto">'+
     '<table class="dtable"><thead><tr><th style="text-align:left"></th>'+
     ['Revenue','EBIT','NOPAT','D&A','CapEx','ΔNWC','FCF','PV(FCF)'].map(function(h){return'<th>'+h+'</th>'}).join('')+
